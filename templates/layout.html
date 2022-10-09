@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='home.css')}}" />
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+  <body>
+    <div class="navbar">
+        <a href="{{ url_for('home') }}" class="navbar-brand">Home</a>
+        <a href="{{ url_for('reports') }}" class="navbar-item">Relatorios</a>
+        <a href="{{ url_for('tartarugometro') }}" class="navbar-item">Tartarugometro</a>
+        <a href="{{ url_for('users_control') }}" class="navbar-item">Controle dos Usuarios</a>
+    </div>
+
+    <div class="body-content">
+        {% block content %}
+        {% endblock %}
+        <hr/>
+        <footer>
+            <p>&copy; 2022</p>
+        </footer>
+    </div>
+</body>
+</html>
