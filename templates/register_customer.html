@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Controle de Usuario
+    Login
 {% endblock %}
 
 {% block content %}
 <div class="container-sm" style="border: 1px;">
-    <h2>Controle de Usuario - Cadastro</h2>
+    <h2>Login</h2>
     <br>
-    <form action="/" method="POST">
+    <form action="/register" method="POST">
         <div class="mb-3">
             <label for="exampleInputEmail1" class="form-label">Email</label>
             <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="email">
@@ -17,7 +17,7 @@
             <label for="exampleInputPassword1" class="form-label">Senha</label>
             <input type="password" class="form-control" id="exampleInputPassword1" name="password">
         </div>
-        <button type="submit" class="btn btn-primary">Cadastrar</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>
 

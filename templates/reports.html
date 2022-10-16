@@ -5,5 +5,14 @@
 {% endblock %}
 
 {% block content %}
-    <p>Contact page for the Visual Studio Code Flask tutorial.</p>
+    <div class="container-fluid">
+
+        {% for report in values %}
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-action" aria-current="true">{{report}}</li>
+            </ul>
+        {% endfor %}
+        
+    </div>
+
 {% endblock %}

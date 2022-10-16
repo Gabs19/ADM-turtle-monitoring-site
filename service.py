@@ -13,5 +13,11 @@ firebaseConfig = {
 
 firebase = pyrebase.initialize_app(firebaseConfig)
 db = firebase.database()
+auth = firebase.auth()
 
-db.child("names").push({"name" : "teste"})
+
+#db.child("names").push({"name" : "teste"})
+
+# user = auth.sign_in_with_email_and_password(email, senha)
+#info = auth.get_account_info(user['idToken'])
+# print(info)
