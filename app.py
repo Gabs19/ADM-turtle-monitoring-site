@@ -46,22 +46,44 @@ def reports():
     report = reports.val()
     return render_template("reports.html", values=report.values())
 
+
 @app.route("/tartarugometro/")
 def tartarugometro():
     return render_template("tartarugometro.html")
 
-@app.route("/controle-usuario/", methods=['POST', 'GET'] )
+
+@app.route("/controle-usuario/", methods=['POST', 'GET'])
 def users_control():
     if('user' in session):
         if request.method == 'POST':
+            nome = request.form.get('nome')
             email = request.form.get('email')
             password = request.form.get(str('password'))
             try:
                 user = service.auth.create_user_with_email_and_password(email,password)
-                service.db.child('users').generate_key(service.auth.get_account_info(user['idToken'])).push({"email" : email})
-                return redirect('/')
+                service.db.child('users').child(user['localId']).set({'email': email, 'nome': nome, 'id': user['localId'], 'idtoken': user['idToken']})
             except:
                 return 'Falha ao cadastrar novo usuario'
     else:
         return redirect('/login')
-    return render_template("users_control.html")
+
+    users = service.db.child('users').get()
+    read_user = users.val()
+
+    if read_user != None:
+        return render_template("users_control.html", values=read_user.values())
+    else:
+        return render_template('users_control.html')
+
+@app.route("/delete/<string:id>/", methods=['POST', 'GET'])
+def delete_user(id):
+    idToken = service.db.child('users').child(id).get()
+    token = idToken.val()
+
+    service.db.child('users').child(id).remove()
+    service.auth.delete_user_account(token['idtoken'])
+
+    return redirect('/controle-usuario/')
+
+if __name__ == "__main__":
+    app.run(debug=True)

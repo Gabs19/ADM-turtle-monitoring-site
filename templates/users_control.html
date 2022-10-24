@@ -8,7 +8,11 @@
 <div class="container-sm" style="border: 1px;">
     <h2>Controle de Usuario - Cadastro</h2>
     <br>
-    <form action="/" method="POST">
+    <form action="/controle-usuario" method="POST">
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Nome</label>
+            <input type="text" class="form-control" id="exampleInputText" aria-describedby="emailHelp" name="nome">
+        </div>
         <div class="mb-3">
             <label for="exampleInputEmail1" class="form-label">Email</label>
             <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="email">
@@ -19,6 +23,33 @@
         </div>
         <button type="submit" class="btn btn-primary">Cadastrar</button>
     </form>
+
+    <br>
+    <br>
+    <br>
+
+
+        <h2>Lista de usuarios cadastrados</h2>
+        <hr>
+
+        <div class="container-fluid">
+
+        {% for report in values %}
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-action" aria-current="true">
+                    {{report.email}}
+                    <a href="/delete/{{report.id}}" style="float: right;"  name='remover' class="btn btn-danger">Remover</a>
+                </li>
+            </ul>
+            <br>
+        {% endfor %}
+
+        </div>
+
 </div>
+
+</div>
+
+
 
 {% endblock %}
