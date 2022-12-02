@@ -1,8 +1,11 @@
-import email
-from webbrowser import get
-from flask import Flask, session
+import threading
+import time
+
+from flask import Flask
 from flask import render_template, request, redirect, session
-import service
+from service import service
+import pandas as pd
+from util import data_eclosao
 
 app = Flask(__name__)
 
@@ -42,9 +45,40 @@ def logout():
 # New functions
 @app.route("/Relatorios/")
 def reports():
-    reports = service.db.child('names').get()
+    reports = service.db.child('ninhos-localizações').get()
     report = reports.val()
     return render_template("reports.html", values=report.values())
+
+@app.route("/generate/<string:id>/", methods=['POST', 'GET'])
+def generate_csv(id):
+    idtoken = service.db.child('ninhos-localizações').get()
+
+    for id_reports in idtoken.val().values():
+        if id_reports['id'] == id:
+            id_report = id_reports
+
+            df = pd.DataFrame(list(id_report.items()),columns = ['Dados Gerais', 'Valores coletados'])
+            print(df)
+            print(type(df))
+
+            writer = pd.ExcelWriter(f'reports/{id_report["id"].replace(":","_")}.xlsx', engine='xlsxwriter')
+            df.to_excel(writer, sheet_name='Sheet1', index=False)
+
+            worksheet = writer.sheets['Sheet1']  # pull worksheet object
+            for idx, col in enumerate(df):  # loop through all columns
+                series = df[col]
+                max_len = max((
+                    series.astype(str).map(len).max(),  # len of largest item
+                    len(str(series.name))  # len of column name/header
+                )) + 1  # adding a little extra space
+                worksheet.set_column(idx, idx, max_len)
+
+            writer.close()
+
+        else:
+            print('next report')
+
+    return redirect('/Relatorios')
 
 
 @app.route("/tartarugometro/")
@@ -54,13 +88,13 @@ def tartarugometro():
 
 @app.route("/controle-usuario/", methods=['POST', 'GET'])
 def users_control():
-    if('user' in session):
+    if 'user' in session:
         if request.method == 'POST':
             nome = request.form.get('nome')
             email = request.form.get('email')
             password = request.form.get(str('password'))
             try:
-                user = service.auth.create_user_with_email_and_password(email,password)
+                user = service.auth.create_user_with_email_and_password(email, password)
                 service.db.child('users').child(user['localId']).set({'email': email, 'nome': nome, 'id': user['localId'], 'idtoken': user['idToken']})
             except:
                 return 'Falha ao cadastrar novo usuario'
@@ -70,7 +104,7 @@ def users_control():
     users = service.db.child('users').get()
     read_user = users.val()
 
-    if read_user != None:
+    if read_user is not None:
         return render_template("users_control.html", values=read_user.values())
     else:
         return render_template('users_control.html')
@@ -85,5 +119,10 @@ def delete_user(id):
 
     return redirect('/controle-usuario/')
 
+def web():
+    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=5000)
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    threading.Thread(target=web, daemon=True).start()
+    threading.Thread(target=data_eclosao.readingDates(),daemon=True).start()
+
