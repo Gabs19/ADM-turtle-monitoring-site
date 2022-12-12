@@ -43,11 +43,24 @@ def logout():
 
 
 # New functions
-@app.route("/Relatorios/")
+@app.route("/Relatorios/", methods=['POST','GET'])
 def reports():
-    reports = service.db.child('ninhos-localizações').get()
-    report = reports.val()
-    return render_template("reports.html", values=report.values())
+    if request.method == "POST":
+        data = request.form.get('report')
+        all_reports = service.db.child('ninhos-localizações').get().val()
+        reports = all_reports.values()
+
+        for report in reports:
+            if data == report['nomeMarcador']:
+                return render_template("reports.html", values=[report])
+
+        return render_template("reports.html", values=None)
+
+    else:
+        reports = service.db.child('ninhos-localizações').order_by_key().limit_to_last(6).get()
+        report = reports.val()
+
+        return render_template("reports.html", values=report.values())
 
 @app.route("/generate/<string:id>/", methods=['POST', 'GET'])
 def generate_csv(id):

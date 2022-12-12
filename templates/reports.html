@@ -5,31 +5,41 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container-fluid">
-
-        {% for report in values %}
-            <ul class="list-group">
-                <li class="list-group-item list-group-item-action" aria-current="true">
-                    <div id="reports">
-                        {% if report.tipo == 'reprodutivo' %}
-                            <div id="reports-data">
-                                <p class="nome-marcador">{{report.nomeMarcador}} </p>
-                                <p>{{report.tipo}}</p>
-                            </div>
-                        {% else %}
-                            <div>
-                                {{report.nomeMarcador}}
-                                {{report.tipo}}
-                            </div>
-                        {% endif  %}
-                        <a href="/generate/{{report.id}}" style="float: right;"  name='csv' class="btn btn-primary">
-                           <svg class="bi d-block mx-auto mb-1" width="16" height="16" viewBox="0 0 16 16"><use xlink:href="#csv"/></svg> Gerar csv
-                        </a>
-                    </div>
-                </li>
-                <br>
-            </ul>
-        {% endfor %}
+    <div class="container-lg">
+        <form action="/Relatorios" method="POST">
+            <div class="input-group">
+                <input type="search" class="form-control rounded" placeholder="Digite o nome do marcador..." aria-label="Search" aria-describedby="search-addon" name="report" />
+                <input type="submit" class="btn btn-outline-primary" value="Pesquisar">
+            </div>
+        </form>
+        <br>
+        {% if values == None %}
+            <h2>Não há nenhum reporte cadastrado com esse nome</h2>
+        {% else %}
+            {% for report in values %}
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-action" aria-current="true">
+                        <div id="reports">
+                            {% if report.tipo == 'reprodutivo' %}
+                                <div id="reports-data">
+                                    <p class="nome-marcador">{{report.nomeMarcador}} </p>
+                                    <p>{{report.tipo}}</p>
+                                </div>
+                            {% else %}
+                                <div>
+                                    <p class="nome-marcador">{{report.nomeMarcador}} </p>
+                                    <p>{{report.tipo}}</p>
+                                </div>
+                            {% endif  %}
+                            <a href="/generate/{{report.id}}" style="float: right;"  name='csv' class="btn btn-primary">
+                               <svg class="bi d-block mx-auto mb-1" width="16" height="16" viewBox="0 0 16 16"><use xlink:href="#csv"/></svg> Gerar csv
+                            </a>
+                        </div>
+                    </li>
+                    <br>
+                </ul>
+            {% endfor %}
+        {% endif %}
         
     </div>
 
