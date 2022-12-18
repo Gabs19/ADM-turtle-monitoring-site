@@ -2,10 +2,11 @@ import threading
 import time
 
 from flask import Flask
-from flask import render_template, request, redirect, session
+from flask import render_template, request, redirect, session, send_file
 from service import service
 import pandas as pd
 from util import data_eclosao
+from util import writer_csv
 
 app = Flask(__name__)
 
@@ -70,11 +71,10 @@ def generate_csv(id):
         if id_reports['id'] == id:
             id_report = id_reports
 
-            df = pd.DataFrame(list(id_report.items()),columns = ['Dados Gerais', 'Valores coletados'])
-            print(df)
-            print(type(df))
+            df = pd.DataFrame(list(id_report.items()), columns=['Dados Gerais', 'Valores coletados'])
+            filename = f'reports/{id_report["id"].replace(":","_")}.xlsx'
 
-            writer = pd.ExcelWriter(f'reports/{id_report["id"].replace(":","_")}.xlsx', engine='xlsxwriter')
+            writer = pd.ExcelWriter(filename, engine='xlsxwriter')
             df.to_excel(writer, sheet_name='Sheet1', index=False)
 
             worksheet = writer.sheets['Sheet1']  # pull worksheet object
@@ -91,7 +91,40 @@ def generate_csv(id):
         else:
             print('next report')
 
-    return redirect('/Relatorios')
+    return send_file(filename, as_attachment=True)
+@app.route("/generate/", methods=['POST', 'GET'])
+def generate_all_csv():
+
+    reprodutivos = []
+    non_reprodutivos = []
+
+    reports = service.db.child('ninhos-localizações').get().val().values()
+
+    reprodutivos_columns = ['nomeMarcador', 'tipo', 'especie', 'desova', 'equipe', 'localizacao', 'latitude', 'longitude', 'dataEclosão',
+     'qtdOvosEclodidos', 'qtdOvosNEclodidos', 'natimorto', 'obs']
+
+    non_reprodutivos_columns = ['nomeMarcador', 'tipo', 'especie', 'latitude', 'longitude', 'ocorrencia', 'provavelCausa', 'marcasVisiveis', 'comprimentoCasco', 'larguraCasco', 'obs']
+
+    for report in reports:
+        if report['tipo'] == 'reprodutivo':
+            reprodutivos.append(report)
+        else:
+            non_reprodutivos.append(report)
+
+    df_reprodutivo = pd.DataFrame(reprodutivos)
+    df_reprodutivo = df_reprodutivo[reprodutivos_columns]
+
+    # writer_csv.writer('reports/reprodutivos.xlsx', df_reprodutivo)
+
+    df_non_reprodutivo = pd.DataFrame(non_reprodutivos)
+    df_non_reprodutivo = df_non_reprodutivo[non_reprodutivos_columns]
+
+    with pd.ExcelWriter('reports/reports.xlsx') as writer:
+
+        df_reprodutivo.to_excel(writer, sheet_name='Reprodutivo', index=False)
+        df_non_reprodutivo.to_excel(writer, sheet_name='Não Reprodutivo', index=False)
+
+    return send_file('reports/reports.xlsx', as_attachment=True)
 
 
 @app.route("/tartarugometro/")

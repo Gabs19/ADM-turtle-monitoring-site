@@ -12,6 +12,14 @@
                 <input type="submit" class="btn btn-outline-primary" value="Pesquisar">
             </div>
         </form>
+
+        <br>
+        <div class="d-grid gap-2">
+             <a href="/generate"  name='csv' class="btn btn-primary">
+                 <svg class="bi d-block mx-auto mb-1" width="16" height="16" viewBox="0 0 16 16"><use xlink:href="#csv"/></svg> Gerar relatorio total
+             </a>
+        </div>
+
         <br>
         {% if values == None %}
             <h2>Não há nenhum reporte cadastrado com esse nome</h2>
@@ -32,7 +40,8 @@
                                 </div>
                             {% endif  %}
                             <a href="/generate/{{report.id}}" style="float: right;"  name='csv' class="btn btn-primary">
-                               <svg class="bi d-block mx-auto mb-1" width="16" height="16" viewBox="0 0 16 16"><use xlink:href="#csv"/></svg> Gerar csv
+                               <svg class="bi d-block mx-auto mb-1" width="16" height="16" viewBox="0 0 16 16"><use xlink:href="#csv"/></svg>
+                                Gerar relatorio individual
                             </a>
                         </div>
                     </li>
