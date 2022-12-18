@@ -2,38 +2,35 @@ import datetime
 import email.message
 import time
 import smtplib
+import schedule
 from service import service
 from email.message import EmailMessage
 
 
 def readingDates():
-    while True:
-        reports = service.db.child('data-eclosao').get()
-        report = reports.val().values()
 
-        for date in report:
-            print('inicio')
-            data_current = datetime.datetime.now()
-            print('func')
-            print(data_current)
+    reports = service.db.child('data-eclosao').get()
+    report = reports.val().values()
 
-            data = date['data'].split('GMT-0300')[0].split(' ')
-            del data[0]
-            del data[4]
+    for date in report:
+        print('inicio')
+        data_current = datetime.datetime.now()
+        print('func')
+        print(data_current)
 
-            new_date = ' '.join(data)
-            data_format = datetime.datetime.strptime(new_date, "%b %d %Y %H:%M:%S")
-            next_day = data_format - datetime.timedelta(days=1)
+        data = date['data'].split('GMT-0300')[0].split(' ')
+        del data[0]
+        del data[4]
 
-            print('firebase')
-            print(new_date)
-            print(data_format)
-            print(next_day)
+        new_date = ' '.join(data)
+        data_format = datetime.datetime.strptime(new_date, "%b %d %Y %H:%M:%S")
+        next_day = data_format - datetime.timedelta(days=1)
 
-            if data_current.date() == next_day.date():
-                send_email()
+        if data_current.date() == next_day.date():
+            send_email()
 
-        time.sleep(43200)
+
+schedule.every().day.at("00:00").do(readingDates)
 
 def send_email():
 
@@ -56,3 +53,10 @@ def send_email():
     s.login(msg['From'], password)
     s.sendmail(msg['From'], [msg['To']], msg.as_string().encode('utf-8'))
     print('Email enviado')
+
+
+while True:
+    # Checks whether a scheduled task
+    # is pending to run or not
+    schedule.run_pending()
+    time.sleep(1)
