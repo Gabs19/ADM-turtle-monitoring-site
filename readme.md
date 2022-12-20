@@ -12,7 +12,7 @@
  ```
  > Tutorial de como criar um ambiente virtual
  
- [Ambiente virtual(https://docs.python.org/pt-br/3/tutorial/venv.html)
+ [Ambiente virtual](https://docs.python.org/pt-br/3/tutorial/venv.html)
  
  Após baixar e instalar os componentes acima, execute esse comando dentro da pasta raiz do repositorio
  
