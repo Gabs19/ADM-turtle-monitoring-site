@@ -67,29 +67,33 @@ def reports():
 def generate_csv(id):
     idtoken = service.db.child('ninhos-localizações').get()
 
-    for id_reports in idtoken.val().values():
-        if id_reports['id'] == id:
-            id_report = id_reports
+    try:
+        for id_reports in idtoken.val().values():
+            if id_reports['id'] == id:
+                id_report = id_reports
 
-            df = pd.DataFrame(list(id_report.items()), columns=['Dados Gerais', 'Valores coletados'])
-            filename = f'reports/{id_report["id"].replace(":","_")}.xlsx'
+                df = pd.DataFrame(list(id_report.items()), columns=['Dados Gerais', 'Valores coletados'])
+                filename = f'reports/{id_report["id"].replace(":","_")}.xlsx'
 
-            writer = pd.ExcelWriter(filename, engine='xlsxwriter')
-            df.to_excel(writer, sheet_name='Sheet1', index=False)
+                writer = pd.ExcelWriter(filename, engine='xlsxwriter')
+                df.to_excel(writer, sheet_name='Sheet1', index=False)
 
-            worksheet = writer.sheets['Sheet1']  # pull worksheet object
-            for idx, col in enumerate(df):  # loop through all columns
-                series = df[col]
-                max_len = max((
-                    series.astype(str).map(len).max(),  # len of largest item
-                    len(str(series.name))  # len of column name/header
-                )) + 1  # adding a little extra space
-                worksheet.set_column(idx, idx, max_len)
+                worksheet = writer.sheets['Sheet1']  # pull worksheet object
+                for idx, col in enumerate(df):  # loop through all columns
+                    series = df[col]
+                    max_len = max((
+                        series.astype(str).map(len).max(),  # len of largest item
+                        len(str(series.name))  # len of column name/header
+                    )) + 1  # adding a little extra space
+                    worksheet.set_column(idx, idx, max_len)
 
-            writer.close()
+                writer.close()
 
-        else:
-            print('next report')
+            else:
+                print('next report')
+    except:
+        print("Falha ao coletar os dados")
+        return render_template("error.html", values='Falha ao coletar os dados')
 
     return send_file(filename, as_attachment=True)
 @app.route("/generate/", methods=['POST', 'GET'])
@@ -111,13 +115,20 @@ def generate_all_csv():
         else:
             non_reprodutivos.append(report)
 
-    df_reprodutivo = pd.DataFrame(reprodutivos)
-    df_reprodutivo = df_reprodutivo[reprodutivos_columns]
+    try:
+        df_reprodutivo = pd.DataFrame(reprodutivos)
+        df_reprodutivo = df_reprodutivo[reprodutivos_columns]
+    except:
+        print("Falha ao coletar os dados")
+        return render_template("error.html", values='Falha ao coletar os dados')
 
     # writer_csv.writer('reports/reprodutivos.xlsx', df_reprodutivo)
-
-    df_non_reprodutivo = pd.DataFrame(non_reprodutivos)
-    df_non_reprodutivo = df_non_reprodutivo[non_reprodutivos_columns]
+    try:
+        df_non_reprodutivo = pd.DataFrame(non_reprodutivos)
+        df_non_reprodutivo = df_non_reprodutivo[non_reprodutivos_columns]
+    except:
+        print("Falha ao coletar os dados")
+        return render_template("error.html", values='Falha ao coletar os dados')
 
     with pd.ExcelWriter('reports/reports.xlsx') as writer:
 
